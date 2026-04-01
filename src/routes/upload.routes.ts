@@ -4,6 +4,7 @@ import upload from '../middleware/upload.middleware';
 import {
   uploadPetPhoto,
   deletePetPhoto,
+  uploadVaccinationDocument,
 } from '../controllers/upload.controller';
 
 const router = Router();
@@ -16,12 +17,23 @@ router.use(protect);
  * POST /api/pets/upload
  * Content-Type: multipart/form-data
  * Field name: "photo"
- * Note: Each pet can have ONLY 1 photo
  */
 router.post(
-  '/',
+  '/upload',
   upload.single('photo'),
   (req, res) => uploadPetPhoto(req, res)
+);
+
+/**
+ * Upload vaccination document
+ * POST /api/pets/upload-vaccination
+ * Content-Type: multipart/form-data
+ * Field name: "document"
+ */
+router.post(
+  '/upload-vaccination',
+  upload.single('document'),
+  (req, res) => uploadVaccinationDocument(req, res)
 );
 
 /**
@@ -29,7 +41,7 @@ router.post(
  * DELETE /api/pets/upload/:publicId
  */
 router.delete(
-  '/:publicId',
+  '/upload/:publicId',
   (req, res) => deletePetPhoto(req, res)
 );
 

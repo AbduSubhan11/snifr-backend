@@ -32,3 +32,18 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     return sendError(res, 'Not authorized to access this route', 'INVALID_TOKEN', 401);
   }
 };
+
+/**
+ * Admin only middleware - checks if user has admin privileges
+ */
+export const adminOnly = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return sendError(res, 'Not authenticated', 'NO_USER', 401);
+  }
+
+  if (!req.user.is_admin) {
+    return sendError(res, 'Admin access required', 'ADMIN_ONLY', 403);
+  }
+
+  next();
+};

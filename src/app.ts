@@ -7,6 +7,7 @@ import uploadRoutes from './routes/upload.routes';
 import matchRoutes from './routes/match.routes';
 import playdateRoutes from './routes/playdate.routes';
 import locationRoutes from './routes/location.routes';
+import verificationRoutes from './routes/verification.routes';
 
 const app = express();
 
@@ -47,10 +48,11 @@ app.get('/health', (req, res) => {
 // Routes - Apply rate limiter only to specific auth endpoints that need it
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
-app.use('/api/pets/upload', uploadRoutes);
+app.use('/api/pets', uploadRoutes);  // Mount at /api/pets so routes become /api/pets/upload and /api/pets/upload-vaccination
 app.use('/api/matches', matchRoutes);
 app.use('/api/playdates', playdateRoutes);
 app.use('/api/location', locationRoutes);
+app.use('/api/verification', verificationRoutes);
 
 // 404 handler
 app.use((req, res) => {

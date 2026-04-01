@@ -30,6 +30,8 @@ const formatPet = (pet: any) => ({
   photoPublicId: pet.photo_public_id || null,
   isVerified: pet.is_verified,
   vaccinationStatus: pet.vaccination_status,
+  vaccinationDocumentUrl: pet.vaccination_document_url || null,
+  vaccinationDocumentPublicId: pet.vaccination_document_public_id || null,
   compatibilityScore: pet.compatibility_score,
   isActive: pet.is_active,
   createdAt: pet.created_at,

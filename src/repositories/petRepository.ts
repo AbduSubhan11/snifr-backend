@@ -14,6 +14,8 @@ export interface PetData {
   photo_url?: string;
   photo_public_id?: string;
   vaccination_status?: boolean;
+  vaccination_document_url?: string;
+  vaccination_document_public_id?: string;
 }
 
 export interface PetUpdateData extends Partial<PetData> {
@@ -119,7 +121,8 @@ export const updatePet = async (petId: string, userId: string, updateData: PetUp
     'name', 'breed', 'age', 'gender', 'species', 'temperament',
     'energy_level', 'weight', 'color', 'bio',
     'photo_url', 'photo_public_id',
-    'is_verified', 'vaccination_status', 'compatibility_score', 'is_active'
+    'is_verified', 'vaccination_status', 'compatibility_score', 'is_active',
+    'vaccination_document_url', 'vaccination_document_public_id'
   ];
 
   const updates: string[] = [];

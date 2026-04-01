@@ -65,3 +65,42 @@ export const deletePetPhoto = async (req: Request, res: Response) => {
     return sendError(res, 'Failed to delete image', error.message, 500);
   }
 };
+
+/**
+ * Upload vaccination document to Cloudinary
+ * POST /api/pets/upload-vaccination
+ */
+export const uploadVaccinationDocument = async (req: Request, res: Response) => {
+  try {
+    const file = (req as any).file as Express.Multer.File;
+
+    if (!file) {
+      return sendError(res, 'No file uploaded', 'NO_FILE', 400);
+    }
+
+    // Convert buffer to base64
+    const b64 = Buffer.from(file.buffer).toString('base64');
+    const dataURI = `data:${file.mimetype};base64,${b64}`;
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'snifr/verification_documents',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'webp'],
+      transformation: [
+        { width: 1920, height: 1920, crop: 'limit' },
+        { quality: 'auto:good' }
+      ]
+    });
+
+    return sendSuccess(res, 'Vaccination document uploaded successfully', {
+      url: result.secure_url,
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format
+    }, 201);
+  } catch (error: any) {
+    console.error('Vaccination upload error:', error.message);
+    return sendError(res, 'Failed to upload vaccination document', error.message, 500);
+  }
+};
