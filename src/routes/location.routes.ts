@@ -6,7 +6,8 @@ import {
   toggleLocationShare,
   updateLocationVisibility,
   getNearby,
-  stopSharingLocation
+  stopSharingLocation,
+  getAllSharingLocation
 } from '../controllers/location.controller';
 
 const router = Router();
@@ -23,5 +24,6 @@ router.delete('/', stopSharingLocation);
 
 // Discovery routes
 router.get('/nearby', getNearby);
+router.get('/all', getAllSharingLocation);
 
 export default router;

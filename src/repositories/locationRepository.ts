@@ -212,3 +212,51 @@ export const clearUserLocation = async (
     [userId]
   );
 };
+
+/**
+ * Get all users who are sharing their location (no distance filter)
+ * This is used for displaying all pets on a map view
+ */
+export const getAllLocationSharingUsers = async (
+  userId: string,
+  limit: number = 100
+): Promise<UserLocation[]> => {
+  const result = await query(
+    `SELECT
+       u.id,
+       u.email,
+       u.full_name,
+       u.avatar_url,
+       u.latitude,
+       u.longitude,
+       u.location_accuracy,
+       u.location_updated_at,
+       u.share_location,
+       u.location_visibility,
+       p.name as pet_name,
+       p.breed as pet_breed,
+       p.species as pet_species,
+       p.photo_url as pet_photo_url,
+       (6371 * acos(
+         cos(radians(users_current.latitude)) *
+         cos(radians(u.latitude)) *
+         cos(radians(u.longitude) - radians(users_current.longitude)) +
+         sin(radians(users_current.latitude)) *
+         sin(radians(u.latitude))
+       )) as distance_km
+     FROM users u
+     LEFT JOIN pets p ON u.id = p.user_id AND p.is_active = TRUE
+     LEFT JOIN users users_current ON users_current.id = $1
+     WHERE u.id != $1
+       AND u.share_location = TRUE
+       AND u.location_visibility IN ('everyone', 'matches')
+       AND u.is_active = TRUE
+       AND u.latitude IS NOT NULL
+       AND u.longitude IS NOT NULL
+     ORDER BY distance_km
+     LIMIT $2`,
+    [userId, limit]
+  );
+
+  return result.rows;
+};

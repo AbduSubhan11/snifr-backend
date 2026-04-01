@@ -6,7 +6,8 @@ import {
   getUserLocationSettings,
   getNearbyUsers,
   getNearbyMatches,
-  clearUserLocation
+  clearUserLocation,
+  getAllLocationSharingUsers
 } from '../repositories/locationRepository';
 
 /**
@@ -229,6 +230,49 @@ export const stopSharingLocation = async (req: any, res: Response) => {
     });
   } catch (error: any) {
     console.error('Stop sharing location error:', error);
+    return sendError(res, 'Server error', error.message, 500);
+  }
+};
+
+/**
+ * Get all users who are sharing their location (for map view)
+ * GET /api/location/all
+ */
+export const getAllSharingLocation = async (req: any, res: Response) => {
+  const { limit = 100 } = req.query;
+
+  try {
+    const sharingUsers = await getAllLocationSharingUsers(
+      req.user.id,
+      parseInt(limit)
+    );
+
+    // Format response
+    const formattedUsers = sharingUsers.map(user => ({
+      id: user.id,
+      fullName: user.full_name,
+      avatar: user.avatar_url,
+      location: {
+        latitude: user.latitude,
+        longitude: user.longitude,
+        accuracy: user.location_accuracy,
+        updatedAt: user.location_updated_at
+      },
+      pet: {
+        name: user.pet_name,
+        breed: user.pet_breed,
+        species: user.pet_species,
+        photoUrl: user.pet_photo_url
+      },
+      distanceKm: parseFloat((user as any).distance_km).toFixed(2)
+    }));
+
+    return sendSuccess(res, 'All location-sharing users retrieved successfully', {
+      users: formattedUsers,
+      count: formattedUsers.length
+    });
+  } catch (error: any) {
+    console.error('Get all sharing location error:', error);
     return sendError(res, 'Server error', error.message, 500);
   }
 };
