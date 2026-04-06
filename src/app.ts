@@ -8,6 +8,7 @@ import matchRoutes from './routes/match.routes';
 import playdateRoutes from './routes/playdate.routes';
 import locationRoutes from './routes/location.routes';
 import verificationRoutes from './routes/verification.routes';
+import messageRoutes from './routes/message.routes';
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/playdates', playdateRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/verification', verificationRoutes);
+app.use('/api/messages', messageRoutes);
 
 // 404 handler
 app.use((req, res) => {

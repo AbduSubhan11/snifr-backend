@@ -1,8 +1,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import app from './app';
 import pool from './config/db';
+import { initializeSocket } from './config/socket';
 import os from 'os';
 
 const PORT = process.env.PORT || 5000;
@@ -29,9 +32,25 @@ const startServer = async () => {
     await pool.query('SELECT 1');
     console.log('✅ Database connection successful');
 
-    app.listen(PORT, () => {
+    // Create HTTP server
+    const httpServer = createServer(app);
+
+    // Initialize Socket.io
+    const io = new Server(httpServer, {
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+      },
+    });
+
+    // Initialize Socket.io handlers
+    initializeSocket(io);
+
+    // Start listening
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔌 Socket.io enabled`);
       console.log(`\n📍 API URLs for Expo/React Native:`);
       console.log(`   Local:    http://localhost:${PORT}`);
       console.log(`   Network:  http://${getLocalIP()}:${PORT}`);
