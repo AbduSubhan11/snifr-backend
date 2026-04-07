@@ -209,6 +209,10 @@ export const getMatchesByUserId = async (userId: string, limit: number = 50) => 
         ELSE p1.age
       END as pet_age,
       CASE
+        WHEN p1.user_id = $1 THEN p2.gender
+        ELSE p1.gender
+      END as pet_gender,
+      CASE
         WHEN p1.user_id = $1 THEN p2.species
         ELSE p1.species
       END as pet_species,
@@ -266,6 +270,7 @@ export const getMatchesByUserId = async (userId: string, limit: number = 50) => 
       petName: row.pet_name,
       petBreed: row.pet_breed,
       petAge: row.pet_age,
+      petGender: row.pet_gender,
       petSpecies: row.pet_species,
       petPhoto: row.pet_photo,
       petEnergyLevel: row.pet_energy_level,

@@ -53,7 +53,11 @@ export const getMessagesByMatchId = async (matchId: string, limit: number = 50, 
   `;
 
   const result = await pool.query(query, [matchId, limit, offset]);
-  return result.rows;
+  
+  // Sort by created_at ascending (oldest first)
+  return result.rows.sort((a, b) => 
+    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
 };
 
 /**

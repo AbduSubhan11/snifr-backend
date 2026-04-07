@@ -7,6 +7,9 @@ import {
   getMatchByIdController,
   getMatchStatsController,
   unmatchController,
+  getPendingRequests,
+  acceptMatchRequest,
+  declineMatchRequest,
 } from '../controllers/match.controller';
 import { protect } from '../middleware/auth.middleware';
 import { validate } from '../middleware/validate.middleware';
@@ -19,6 +22,7 @@ router.use(protect);
 // Validation Rules
 const swipeRules = [
   body('targetPetId').isUUID().withMessage('Invalid target pet ID'),
+  body('userPetId').isUUID().withMessage('Invalid user pet ID'),
   body('liked').isBoolean().withMessage('Liked must be a boolean'),
 ];
 
@@ -36,6 +40,9 @@ const discoverRules = [
 // Get pets available for swiping
 router.get('/discover', discoverRules, validate, getDiscoverPets);
 
+// Get pending match requests
+router.get('/pending', getPendingRequests);
+
 // Swipe on a pet (like/dislike)
 router.post('/swipe', swipeRules, validate, swipePet);
 
@@ -44,6 +51,12 @@ router.get('/', getUserMatches);
 
 // Get match statistics
 router.get('/stats', getMatchStatsController);
+
+// Accept pending match request
+router.patch('/:id/accept', matchIdRules, validate, acceptMatchRequest);
+
+// Decline pending match request
+router.patch('/:id/decline', matchIdRules, validate, declineMatchRequest);
 
 // Get specific match
 router.get('/:id', matchIdRules, validate, getMatchByIdController);

@@ -55,8 +55,11 @@ router.get('/:matchId', async (req: AuthRequest, res) => {
           petPhoto: participants.pet_1_photo,
         };
 
+    // Reverse to get chronological order (oldest first for chat display)
+    const chronologicalMessages = messages.reverse();
+
     sendSuccess(res, 'Messages loaded successfully', {
-      messages: messages.reverse(), // Return in chronological order
+      messages: chronologicalMessages,
       otherUser,
       hasMore: messages.length === parseInt(limit as string),
     });
