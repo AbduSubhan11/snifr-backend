@@ -170,51 +170,65 @@ export const checkForMatch = async (petId: string, targetPetId: string) => {
 };
 
 /**
- * Get all matches for a user
+ * Get all matches for a user grouped by owner
  */
 export const getMatchesByUserId = async (userId: string, limit: number = 50) => {
   const query = `
-    SELECT 
-      m.id,
+    SELECT
+      m.id as match_id,
       m.matched_at,
       m.created_at,
-      -- Get the other pet's info (not user's pet)
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN m.pet_2_id
-        ELSE m.pet_1_id
-      END as matched_pet_id,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.name
-        ELSE p1.name
-      END as matched_pet_name,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.breed
-        ELSE p1.breed
-      END as matched_pet_breed,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.age
-        ELSE p1.age
-      END as matched_pet_age,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.species
-        ELSE p1.species
-      END as matched_pet_species,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.photo_url
-        ELSE p1.photo_url
-      END as matched_pet_photo,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN p2.energy_level
-        ELSE p1.energy_level
-      END as matched_pet_energy_level,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN u2.full_name
+      -- Other user info
+      CASE
+        WHEN p1.user_id = $1 THEN u2.id
+        ELSE u1.id
+      END as owner_id,
+      CASE
+        WHEN p1.user_id = $1 THEN u2.full_name
         ELSE u1.full_name
       END as owner_name,
-      CASE 
-        WHEN m.pet_1_id IN (SELECT id FROM pets WHERE user_id = $1) THEN u2.avatar_url
+      CASE
+        WHEN p1.user_id = $1 THEN u2.avatar_url
         ELSE u1.avatar_url
-      END as owner_avatar
+      END as owner_avatar,
+      -- Matched pet info (the pet that matched with user's pet)
+      CASE
+        WHEN p1.user_id = $1 THEN p2.id
+        ELSE p1.id
+      END as pet_id,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.name
+        ELSE p1.name
+      END as pet_name,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.breed
+        ELSE p1.breed
+      END as pet_breed,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.age
+        ELSE p1.age
+      END as pet_age,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.species
+        ELSE p1.species
+      END as pet_species,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.photo_url
+        ELSE p1.photo_url
+      END as pet_photo,
+      CASE
+        WHEN p1.user_id = $1 THEN p2.energy_level
+        ELSE p1.energy_level
+      END as pet_energy_level,
+      -- User's pet that matched
+      CASE
+        WHEN p1.user_id = $1 THEN p1.name
+        ELSE p2.name
+      END as my_pet_name,
+      CASE
+        WHEN p1.user_id = $1 THEN p1.photo_url
+        ELSE p2.photo_url
+      END as my_pet_photo
     FROM matches m
     JOIN pets p1 ON m.pet_1_id = p1.id
     JOIN pets p2 ON m.pet_2_id = p2.id
@@ -228,7 +242,39 @@ export const getMatchesByUserId = async (userId: string, limit: number = 50) => 
   `;
 
   const result = await pool.query(query, [userId, limit]);
-  return result.rows;
+
+  // Group by owner
+  const ownerMap = new Map();
+
+  result.rows.forEach(row => {
+    const ownerId = row.owner_id;
+
+    if (!ownerMap.has(ownerId)) {
+      ownerMap.set(ownerId, {
+        ownerId: row.owner_id,
+        ownerName: row.owner_name,
+        ownerAvatar: row.owner_avatar,
+        matchedAt: row.matched_at,
+        pets: [],
+      });
+    }
+
+    const ownerData = ownerMap.get(ownerId);
+    ownerData.pets.push({
+      matchId: row.match_id,
+      petId: row.pet_id,
+      petName: row.pet_name,
+      petBreed: row.pet_breed,
+      petAge: row.pet_age,
+      petSpecies: row.pet_species,
+      petPhoto: row.pet_photo,
+      petEnergyLevel: row.pet_energy_level,
+      myPetName: row.my_pet_name,
+      myPetPhoto: row.my_pet_photo,
+    });
+  });
+
+  return Array.from(ownerMap.values());
 };
 
 /**

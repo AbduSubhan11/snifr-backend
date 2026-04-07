@@ -16,7 +16,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
  * Format match data for response
  */
 const formatMatch = (match: any) => ({
-  id: match.id,
+  id: match.match_id,
   matchedPetId: match.matched_pet_id,
   matchedPetName: match.matched_pet_name,
   matchedPetBreed: match.matched_pet_breed,
@@ -28,6 +28,28 @@ const formatMatch = (match: any) => ({
   ownerAvatar: match.owner_avatar,
   matchedAt: match.matched_at,
   createdAt: match.created_at,
+});
+
+/**
+ * Format owner-centric match data
+ */
+const formatOwnerMatch = (ownerMatch: any) => ({
+  ownerId: ownerMatch.ownerId,
+  ownerName: ownerMatch.ownerName,
+  ownerAvatar: ownerMatch.ownerAvatar,
+  matchedAt: ownerMatch.matchedAt,
+  pets: ownerMatch.pets.map((pet: any) => ({
+    matchId: pet.matchId,
+    petId: pet.petId,
+    petName: pet.petName,
+    petBreed: pet.petBreed,
+    petAge: pet.petAge,
+    petSpecies: pet.petSpecies,
+    petPhoto: pet.petPhoto,
+    petEnergyLevel: pet.petEnergyLevel,
+    myPetName: pet.myPetName,
+    myPetPhoto: pet.myPetPhoto,
+  })),
 });
 
 /**
@@ -165,20 +187,20 @@ export const swipePet = async (req: AuthRequest, res: Response) => {
 };
 
 /**
- * Get all matches for the logged-in user
+ * Get all matches for the logged-in user grouped by owner
  * GET /api/matches
  */
 export const getUserMatches = async (req: AuthRequest, res: Response) => {
   try {
     const { limit } = req.query;
-    const matches = await getMatchesByUserId(req.user.id, parseInt(limit as string) || 50);
+    const ownerMatches = await getMatchesByUserId(req.user.id, parseInt(limit as string) || 50);
 
     return sendSuccess(
       res,
       'Matches retrieved successfully',
       {
-        matches: matches.map(formatMatch),
-        count: matches.length,
+        matches: ownerMatches.map(formatOwnerMatch),
+        count: ownerMatches.length,
       },
       200
     );
