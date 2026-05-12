@@ -15,7 +15,7 @@ export interface MatchStats {
 /**
  * Get pets available for swiping (not owned by user, not already swiped)
  */
-export const getAvailablePets = async (userId: string, limit: number = 20, species?: string) => {
+export const getAvailablePets = async (userId: string, limit: number = 20, species?: string, breed?: string) => {
   // First get all user's pets
   const userPetsQuery = `SELECT id FROM pets WHERE user_id = $1 AND is_active = TRUE`;
   const userPets = await pool.query(userPetsQuery, [userId]);
@@ -57,6 +57,20 @@ export const getAvailablePets = async (userId: string, limit: number = 20, speci
     query += ` AND p.species = $${paramIndex}`;
     values.push(species);
     paramIndex++;
+  }
+
+  if (breed) {
+    const breeds = breed.split(',').map(b => b.trim()).filter(Boolean);
+    if (breeds.length > 0) {
+      if (breeds.length === 1) {
+        query += ` AND p.breed = $${paramIndex}`;
+        values.push(breeds[0]);
+      } else {
+        query += ` AND p.breed = ANY($${paramIndex})`;
+        values.push(breeds);
+      }
+      paramIndex++;
+    }
   }
 
   // Exclude pets already swiped by any of user's pets

@@ -81,11 +81,12 @@ const formatDiscoverPet = (pet: any) => ({
  */
 export const getDiscoverPets = async (req: AuthRequest, res: Response) => {
   try {
-    const { species, limit } = req.query;
+    const { species, breed, limit } = req.query;
     const pets = await getAvailablePets(
       req.user.id,
       parseInt(limit as string) || 20,
-      species as string
+      species as string,
+      breed as string
     );
 
     return sendSuccess(

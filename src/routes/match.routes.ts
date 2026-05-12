@@ -32,6 +32,7 @@ const matchIdRules = [
 
 const discoverRules = [
   query('species').optional().isIn(['Dog', 'Cat']).withMessage('Species must be Dog or Cat'),
+  query('breed').optional().trim().notEmpty().withMessage('Breed cannot be empty'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
 ];
 

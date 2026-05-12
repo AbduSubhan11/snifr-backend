@@ -70,8 +70,8 @@ export const createPetProfile = async (req: AuthRequest, res: Response) => {
     );
   }
 
-  if (age < 0 || age > 50) {
-    return sendError(res, 'Age must be between 0 and 50', 'VALIDATION_ERROR', 400);
+  if (age < 0) {
+    return sendError(res, 'Age must be a valid positive number', 'VALIDATION_ERROR', 400);
   }
 
   if (!['Male', 'Female'].includes(gender)) {
@@ -203,8 +203,8 @@ export const updatePetProfile = async (req: AuthRequest, res: Response) => {
   }
 
   // Validation
-  if (updateData.age !== undefined && (updateData.age < 0 || updateData.age > 50)) {
-    return sendError(res, 'Age must be between 0 and 50', 'VALIDATION_ERROR', 400);
+  if (updateData.age !== undefined && updateData.age < 0) {
+    return sendError(res, 'Age must be a valid positive number', 'VALIDATION_ERROR', 400);
   }
 
   if (updateData.gender && !['Male', 'Female'].includes(updateData.gender)) {

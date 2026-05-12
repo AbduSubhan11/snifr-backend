@@ -20,7 +20,7 @@ router.use(protect);
 const createPetRules = [
   body('name').trim().notEmpty().withMessage('Pet name is required'),
   body('breed').trim().notEmpty().withMessage('Breed is required'),
-  body('age').isInt({ min: 0, max: 50 }).withMessage('Age must be between 0 and 50'),
+  body('age').isInt({ min: 0 }).withMessage('Age must be a valid positive number'),
   body('gender').isIn(['Male', 'Female']).withMessage('Gender must be Male or Female'),
   body('species').optional().isIn(['Dog', 'Cat']).withMessage('Species must be Dog or Cat'),
   body('temperament').optional().trim(),
@@ -36,7 +36,7 @@ const updatePetRules = [
   param('id').isUUID().withMessage('Invalid pet ID'),
   body('name').optional().trim().notEmpty().withMessage('Pet name cannot be empty'),
   body('breed').optional().trim().notEmpty().withMessage('Breed cannot be empty'),
-  body('age').optional().isInt({ min: 0, max: 50 }).withMessage('Age must be between 0 and 50'),
+  body('age').optional().isInt({ min: 0 }).withMessage('Age must be a valid positive number'),
   body('gender').optional().isIn(['Male', 'Female']).withMessage('Gender must be Male or Female'),
   body('species').optional().isIn(['Dog', 'Cat']).withMessage('Species must be Dog or Cat'),
   body('temperament').optional().trim(),
